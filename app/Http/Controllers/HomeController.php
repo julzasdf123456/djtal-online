@@ -40,4 +40,10 @@ class HomeController extends Controller
             'id' => $id,
         ]);
     }
+
+    public function createComplaint($acctNo) {
+        return view('/client/create_complaint', [
+            'acctNo' => $acctNo,
+        ]);
+    }
 }

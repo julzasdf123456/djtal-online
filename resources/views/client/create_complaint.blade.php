@@ -461,73 +461,33 @@
            </span>
          </div>
 
-         {{-- Menu --}}
-         <div class="col-lg-6">
-            <a class="btn btn-default btn-sm float-right" href="{{ route('client.create-complaint', [$accountNo]) }}"><i class="fas fa-exclamation-circle ico-tab-mini"></i>Make a Complain</a>
-         </div>
-
-         <div class="col-lg-4">
-            {{-- Account Info --}}
+         <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1 col-sm-12">
             <div class="card">
-               <div class="card-body">
-                  <span class="text-muted" id="account-no">{{ $accountNo }}</span>
-                  <span class="float-right badge" id="status"></span><br>
-                  <h3 id="account-name"></h3>
-                  <p id="account-address"></p>
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-info-circle ico-tab"></i>
+                        Make a Complaint | 
+                        <span class="text-muted" style="font-size: .9em;"><i>Select your complaint in the following list</i></span>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1 col-sm-12">
+                            <div class="input-group row">
+                                <label class="text-muted col-lg-12">Select Complaint</label>
+                                <div class="radio-group col-lg-12" style="margin-left: 20px;" id="ticket-bay">
+                                </div>   
+                            </div>
 
-                  <div class="divider"></div>
-
-                  <table class="table table-hover table-sm table-borderless">
-                     <tr>
-                        <td class="text-muted">Contact Number</td>
-                        <th id="contactNo"></th>
-                     </tr>
-                     <tr>
-                        <td class="text-muted">Email Address</td>
-                        <th id="email"></th>
-                     </tr>
-                     <tr>
-                        <td class="text-muted">Date Connected</td>
-                        <th id="date-connected"></th>
-                     </tr>
-                     <tr>
-                        <td class="text-muted">Monthly Payment</td>
-                        <th id="monthly-payment"></th>
-                     </tr>
-                     <tr>
-                        <td class="text-muted">Speed Subscribed</td>
-                        <th id="speed-subscribed"></th>
-                     </tr>  
-                  </table>
-               </div>
-            </div>
-         </div>
-
-         {{-- Ledger Info --}}
-         <div class="col-lg-8">
-            <div class="card" style="height: 85vh;">
-               <div class="card-header">
-                  <span class="card-title text-muted"><i class="fas fa-info-circle" style="margin-right: 10px;"></i> Ledger</span>
-                  <div id="loader" class="spinner-border gone text-primary float-right" role="status">
-                    <span class="sr-only">Loading...</span>
-                    </div>
-               </div>
-               <div class="card-body table-responsive p-0">
-                  <table class="table table-hover table-bordered table-sm" id="ledgers-table">
-                     <thead>
-                        <th>Billing Month</th>
-                        <th>Bill Number</th>
-                        <th class='text-right'>Amount Due</th>
-                        <th class='text-right'>Amount Paid</th>
-                        <th>Due Date</th>
-                        <th class='text-right'>Balance</th>
-                        <th class="text-right"></th>
-                     </thead>
-                     <tbody>
-
-                     </tbody>
-                  </table>
-               </div>
+                            <div class="input-group row" style="margin-top: 20px;">
+                                <label for="Remarks" class="text-muted col-lg-12">Remarks/Notes</label>
+                                <textarea class="form-control col-lg-12" name="Remarks" id="Remarks" rows="3" placeholder="Describe your complaint further here..."></textarea>
+                            </div>
+                        </div>
+                    </div>                    
+                </div>
+                <div class="card-footer">
+                    <button id="submit" class="btn btn-primary float-right">Submit Complaint <i class="fas fa-arrow-right" style="margin-left: 5px;"></i></button>
+                </div>
             </div>
          </div>
       </div>
@@ -569,93 +529,91 @@
    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    
    <script>
-      $(document).ready(function() {
-        $('#loader').removeClass('gone')
-         getAccount("{{ $accountNo }}")
-         getLedger("{{ $accountNo }}")
-      })
+        $(document).ready(function() {
+            getTicketTypes()
 
-      var Toast = Swal.mixin({
-         toast: true,
-         position: 'top-end',
-         showConfirmButton: false,
-         timer: 3000
-      });
+            $('#submit').on('click', function() {
+                var ticket = $('input[name="TicketType"]:checked').val()
+                var notes = $('#Remarks').val()
+                if (jQuery.isEmptyObject(ticket)) {
+                    Toast.fire({
+                        icon : 'info',
+                        text : 'Please select complaint'
+                    })
+                } else {
+                    if (jQuery.isEmptyObject(notes)) {
+                        Toast.fire({
+                            icon : 'info',
+                            text : 'Please describe your complaint for our technicians to further assess your situation'
+                        })
+                    } else {
+                        insertTicket(ticket, notes)
+                    }
+                }
+            })
+        })
 
-      function getAccount(acctNo) {
-         $.ajax({
-            url : "{{ env('APP_PUBLIC_URL') }}get-account-by-account-number",
-            type : "GET",
-            data : {
-               acctNo : acctNo,
-            },
-            success : function(res) {
-               $('#account-name').text(res['FullName'])
-               $('#account-address').text(res['Address'])
+        var Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000
+        });
 
-               $('#status').text(res['AccountStatus'])
-               if (res['AccountStatus'] == 'ACTIVE') {
-                  $('#status').addClass('bg-success')
-               } else {
-                  $('#status').addClass('bg-danger')
-               }
-
-               $('#contactNo').text(res['ContactNumber'])
-               $('#email').text(res['Email'])
-               $('#date-connected').text(res['DateConnected'])
-               $('#monthly-payment').text(res['MonthlyPayment'])
-               $('#speed-subscribed').text(res['SpeedSubscribed'] + " mbps")
-            },
-            error : function(err) {
-               Toast.fire({
+        function getTicketTypes() {
+            $.ajax({
+                url : "{{ env('APP_PUBLIC_URL') }}get-ticket-types-ajax",
+                type : "GET",
+                success : function(res) {
+                    $.each(res, function(index, element) {
+                        $('#ticket-bay').append(addRowToTicketTypes(res[index]['id'], res[index]['TicketName'], res[index]['Notes']))
+                    })
+                },
+                error : function(err) {
+                    Toast.fire({
                         icon : 'error',
-                        text : 'Error getting account info'
-                     })
-            }
-         })
-      }
+                        text : 'Error getting ticket types'
+                    })
+                }
+            })
+        }
 
-      function getLedger(acctNo) {
-         $('#ledgers-table tbody tr').remove()
-         $.ajax({
-            url : "{{ env('APP_PUBLIC_URL') }}get-latest-bills",
-            type : "GET",
-            data : {
-               q : acctNo,
-            },
-            success : function(res) {
-               $.each(res, function(index, element) {
-                  $('#ledgers-table tbody').append(addLedgerRow(res[index]))                  
-               })
-                $('#loader').addClass('gone')
-            },
-            error : function(err) {
-                $('#loader').addClass('gone')
-               Toast.fire({
+        function addRowToTicketTypes(id, ticket, notes) {
+            return '<div class="form-check">' +
+                        '<input class="form-check-input" type="radio" name="TicketType" value="' + id + '" id="' + id + '">' +
+                        '<label class="form-check-label" for="' + id + '" style="font-weight: bold;">' + ticket + '</label>' +
+                        '<br>' +
+                        '<span class="text-muted">' + (jQuery.isEmptyObject(notes) ? "" : notes) + '</span>' +
+                    '</div>'
+        }
+
+        function insertTicket(ticket, notes) {
+            $.ajax({
+                url : "{{ env('APP_PUBLIC_URL') }}insert-ticket",
+                type : "POST",
+                data : {
+                    _token : "{{ csrf_token() }}",
+                    CustomerId : "{{ $acctNo }}",
+                    Ticket : ticket,
+                    Details : notes,
+                    Status : 'Pending'
+                },
+                success : function(res) {
+                    Toast.fire({
+                        icon : 'success',
+                        text : 'Ticket Filed'
+                    })
+                    window.location.href = "{{ route('client.index', [$acctNo]) }}"
+                },
+                error : function(err) {
+                    Toast.fire({
                         icon : 'error',
-                        text : 'Error getting ledger'
-                     })
-            }
-         })
-      }
-
-      function addLedgerRow(arr) {
-         return "<tr>" +
-                    "<td>" +  (parseFloat(arr['Balance']) > 0 ? `<i class='fas fa-exclamation-circle text-danger'></i>` : `<i class='fas fa-check-circle text-success'></i>`) + " " + moment(arr['ServicePeriodEnd']).format('MMM YYYY') + "</td>" +
-                    "<td>" + arr['BillNumber'] + "</td>" +
-                    "<td class='text-right'>₱ " + Number(parseFloat(arr['TotalAmountDue'])).toLocaleString(2) + "</td>" +
-                    "<td class='text-right'>₱ " + Number(parseFloat(arr['PaidAmount'])).toLocaleString(2) + "</td>" +
-                    "<td>" + moment(arr['DueDate']).format('MMM D, YYYY') + "</td>" +
-                    "<td class='text-right'>₱ " + Number(parseFloat(arr['Balance'])).toLocaleString(2) + "</td>" +
-                    // "<td class='text-right " + (jQuery.isEmptyObject(arr['PaidAmount']) ? 'text-danger' : 'text-success') + "'>₱ " + (jQuery.isEmptyObject(arr['NetAmountPaid']) ? Number(parseFloat(arr['Surcharges']) + parseFloat(arr['NetAmount'])).toLocaleString(2) : Number(parseFloat(arr['NetAmount'])).toLocaleString(2)) + "</td>" +
-                    "<td class='text-right'>" + 
-                        // "<a class='text-primary' style='margin-right: 15px;' title='View Statement of Account'><i class='fas fa-eye'></i></a>" +
-                        "<a class='text-warning' href='" + `{{ url('client/print-soa') }}/` + arr['id'] + "' title='Print Statement of Account'><i class='fas fa-print'></i></a>" +
-                    "</td>" +
-               "</tr>"
-      }
+                        text : 'Error getting ticket types'
+                    })
+                }
+            });
+        }
    </script>
    
    </body>
-   
    </html>

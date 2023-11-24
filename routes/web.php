@@ -25,3 +25,4 @@ Route::get('/', [
 
 Route::get('/client/{acctNo}', [HomeController::class, 'client'])->name('client.index');
 Route::get('/client/print-soa/{id}', [HomeController::class, 'printSoa'])->name('client.print-soa');
+Route::get('/client/create-complaint/{acctNo}', [HomeController::class, 'createComplaint'])->name('client.create-complaint');
