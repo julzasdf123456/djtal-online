@@ -524,7 +524,7 @@
                     text : 'Kindly input account number to proceed!'
                 })
             } else {
-                if (accountNo.length < 10) {
+                if (accountNo.length < 2) {
                     Swal.fire({
                         icon : 'warning',
                         text : 'Account Number invalid!'
