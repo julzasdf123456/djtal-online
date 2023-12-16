@@ -446,7 +446,7 @@
 
                 <div class="card-body">
                     <div class="form-group">
-                        <input id="acct-no" type="text" class="form-control form-control-lg" autofocus maxlength="13" placeholder="Input 13-digit Account Number" style="width: 360px;">
+                        <input id="acct-no" type="text" class="form-control form-control-lg" autofocus maxlength="13" placeholder="Input DJTAL Account Number" style="width: 360px;">
                     </div>
                     <button id="go-btn" class="btn btn-primary" style="width: 360px;">Proceed<i class="fas fa-arrow-right" style="margin-left: 10px;"></i></button>
                 </div>
@@ -502,7 +502,7 @@
                     text : 'Kindly input account number to proceed!'
                 })
             } else {
-                if (accountNo.length < 13) {
+                if (accountNo.length < 2) {
                     Swal.fire({
                         icon : 'warning',
                         text : 'Account Number invalid!'
